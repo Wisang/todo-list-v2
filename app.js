@@ -60,29 +60,6 @@ app.get("/", function(req, res) {
 
 });
 
-app.post("/", function(req, res) {
-  const todoItem = req.body.newItem;
-  const itemObj = new Item({
-    name: todoItem
-  });
-  console.log("Successfully added item");
-  itemObj.save();
-  res.redirect("/");
-});
-
-app.post("/delete", function(req, res) {
-  const idForDelete = req.body.check;
-
-  Item.findByIdAndRemove({_id: idForDelete}, function(err) {
-    if (err) {
-      console.error(err);
-    } else {
-      console.log("Successfully deleted " + idForDelete);
-    }
-  });
-  res.redirect("/");
-});
-
 app.get("/:customListName", function(req, res) {
   const customListName = req.params.customListName;
 
@@ -103,9 +80,43 @@ app.get("/:customListName", function(req, res) {
       }
     }
   });
+});
 
+app.post("/", function(req, res) {
+  const todoItem = req.body.newItem;
+  const listTitle = req.body.list;
+
+  const itemObj = new Item({
+    name: todoItem
+  });
+
+  if(listTitle == "Today") {
+    itemObj.save();
+    res.redirect("/");
+  } else {
+    List.findOne({name: listTitle}, function(err, foundList) {
+      foundList.items.push(itemObj);
+      foundList.save();
+      res.redirect("/" + listTitle);
+    })
+  }
 
 });
+
+app.post("/delete", function(req, res) {
+  const idForDelete = req.body.check;
+
+  Item.findByIdAndRemove({_id: idForDelete}, function(err) {
+    if (err) {
+      console.error(err);
+    } else {
+      console.log("Successfully deleted " + idForDelete);
+    }
+  });
+  res.redirect("/");
+});
+
+
 
 // app.get("/work", function(req, res) {
 //   res.render("list", {
