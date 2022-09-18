@@ -54,24 +54,26 @@ app.get("/", function(req, res) {
 });
 
 app.post("/", function(req, res) {
-
   const todoItem = req.body.newItem;
-
   const itemObj = new Item({
     name: todoItem
   });
-
+  console.log("Successfully added item");
   itemObj.save();
-
   res.redirect("/");
+});
 
-  // if (req.body.list === "Work") {
-  //   workItems.push(item);
-  //   res.redirect("/work");
-  // } else {
-  //   items.push(item);
-  //   res.redirect("/");
-  // }
+app.post("/delete", function(req, res) {
+  const idForDelete = req.body.check;
+
+  Item.findByIdAndRemove({_id: idForDelete}, function(err) {
+    if (err) {
+      console.error(err);
+    } else {
+      console.log("Successfully deleted " + idForDelete);
+    }
+  });
+  res.redirect("/");
 });
 
 app.get("/work", function(req, res) {
