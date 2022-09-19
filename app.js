@@ -13,7 +13,7 @@ app.use(bodyParser.urlencoded({
 }));
 app.use(express.static("public"));
 
-mongoose.connect("mongodb://localhost:27017/todolistDB");
+mongoose.connect("mongodb://localhost:27017/todolistDB2");
 
 const itemsSchema = {
   name: String
@@ -49,12 +49,14 @@ app.get("/", function(req, res) {
         } else {
           console.log("Success");
         }
+        res.redirect("/");
+      });
+    } else {
+      res.render("list", {
+        listTitle: "Today",
+        newListItems: foundItems
       });
     }
-    res.render("list", {
-      listTitle: "Today",
-      newListItems: foundItems
-    });
   });
   // res.render("list", {listTitle: "Today", newListItems: items});
 
@@ -63,23 +65,32 @@ app.get("/", function(req, res) {
 app.get("/:customListName", function(req, res) {
   const customListName = req.params.customListName;
 
-  List.findOne({name: customListName}, function(err, foundList) {
-    if(!err) {
-      if(!foundList) {
-        const list = new List({
-          name: customListName,
-          items: defaultItmes
-        });
-        list.save();
-        res.redirect("/" + customListName);
+  if (customListName === "favicon.ico") {
+    console.log("trying to insert favicon.ico and blocked")
+  } else {
+    List.findOne({
+      name: customListName
+    }, function(err, found) {
+      if (!err) {
+        if (!found) {
+          console.log("trying insert with " + customListName);
+          const list = new List({
+            name: customListName,
+            items: defaultItmes
+          });
+          list.save();
+          res.redirect("/" + customListName);
+        } else {
+          res.render("list", {
+            listTitle: found.name,
+            newListItems: found.items
+          });
+        }
       } else {
-        res.render("list", {
-          listTitle: foundList.name,
-          newListItems: foundList.items
-        });
+        console.log(err);
       }
-    }
-  });
+    });
+  }
 });
 
 app.post("/", function(req, res) {
@@ -90,11 +101,13 @@ app.post("/", function(req, res) {
     name: todoItem
   });
 
-  if(listTitle == "Today") {
+  if (listTitle == "Today") {
     itemObj.save();
     res.redirect("/");
   } else {
-    List.findOne({name: listTitle}, function(err, foundList) {
+    List.findOne({
+      name: listTitle
+    }, function(err, foundList) {
       foundList.items.push(itemObj);
       foundList.save();
       res.redirect("/" + listTitle);
@@ -106,7 +119,9 @@ app.post("/", function(req, res) {
 app.post("/delete", function(req, res) {
   const idForDelete = req.body.check;
 
-  Item.findByIdAndRemove({_id: idForDelete}, function(err) {
+  Item.findByIdAndRemove({
+    _id: idForDelete
+  }, function(err) {
     if (err) {
       console.error(err);
     } else {
