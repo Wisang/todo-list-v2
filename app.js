@@ -118,17 +118,28 @@ app.post("/", function(req, res) {
 
 app.post("/delete", function(req, res) {
   const idForDelete = req.body.check;
+  const listName = req.body.listName;
 
-  Item.findByIdAndRemove({
-    _id: idForDelete
-  }, function(err) {
-    if (err) {
-      console.error(err);
-    } else {
-      console.log("Successfully deleted " + idForDelete);
-    }
-  });
-  res.redirect("/");
+  if(listName === "Today") {
+    Item.findByIdAndRemove({
+      _id: idForDelete
+    }, function(err) {
+      if (err) {
+        console.error(err);
+      } else {
+        console.log("Successfully deleted " + idForDelete);
+      }
+    });
+    res.redirect("/");
+  } else {
+    List.findOneAndUpdate({name: listName}, {$pull: {items: {_id: idForDelete}}}, function(err, result) {
+      if(!err) {
+          res.redirect("/" + listName);
+      }
+    });
+  }
+
+
 });
 
 
