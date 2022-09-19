@@ -65,32 +65,32 @@ app.get("/", function(req, res) {
 app.get("/:customListName", function(req, res) {
   const customListName = req.params.customListName;
 
-  if (customListName === "favicon.ico") {
-    console.log("trying to insert favicon.ico and blocked")
-  } else {
-    List.findOne({
-      name: customListName
-    }, function(err, found) {
-      if (!err) {
-        if (!found) {
-          console.log("trying insert with " + customListName);
-          const list = new List({
-            name: customListName,
-            items: defaultItmes
-          });
-          list.save();
-          res.redirect("/" + customListName);
-        } else {
-          res.render("list", {
-            listTitle: found.name,
-            newListItems: found.items
-          });
-        }
+  // if (customListName === "favicon.ico") {
+  //   console.log("trying to insert favicon.ico and blocked")
+  // } else {
+  List.findOne({
+    name: customListName
+  }, function(err, found) {
+    if (!err) {
+      if (!found) {
+        console.log("trying insert with " + customListName);
+        const list = new List({
+          name: customListName,
+          items: defaultItmes
+        });
+        list.save();
+        res.redirect("/" + customListName);
       } else {
-        console.log(err);
+        res.render("list", {
+          listTitle: found.name,
+          newListItems: found.items
+        });
       }
-    });
-  }
+    } else {
+      console.log(err);
+    }
+  });
+  // }
 });
 
 app.post("/", function(req, res) {
