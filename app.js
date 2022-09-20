@@ -5,6 +5,7 @@ const bodyParser = require("body-parser");
 // const date = require(__dirname + "/date.js");
 const mongoose = require("mongoose");
 const app = express();
+const _ = require("lodash");
 
 app.set('view engine', 'ejs');
 
@@ -63,7 +64,8 @@ app.get("/", function(req, res) {
 });
 
 app.get("/:customListName", function(req, res) {
-  const customListName = req.params.customListName;
+  const customListName = _.capitalize(req.params.customListName);
+  // const customListName = req.params.customListName;
 
   // if (customListName === "favicon.ico") {
   //   console.log("trying to insert favicon.ico and blocked")
@@ -78,8 +80,10 @@ app.get("/:customListName", function(req, res) {
           name: customListName,
           items: defaultItmes
         });
-        list.save();
-        res.redirect("/" + customListName);
+        list.save(function() {
+          res.redirect("/" + customListName);
+        });
+
       } else {
         res.render("list", {
           listTitle: found.name,
